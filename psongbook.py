@@ -3,6 +3,9 @@
 
 # import funkcí z jiného adresáře
 import sys
+import subprocess
+import shlex
+import os
 #sys.path.append("../src/")
 
 import logging
@@ -16,7 +19,7 @@ import pdb
 #print mat
 
 
-def texfile(sngbk, filename = 'psongbook.tex'):
+def gentexfile(sngbk, filename = 'psongbook.tex'):
     head = u'\\documentclass{article}\n\
 \\usepackage{a4wide}\n\
 \\usepackage[czech]{babel}\n\
@@ -53,6 +56,12 @@ def texfile(sngbk, filename = 'psongbook.tex'):
     f.close()
         
 
+def genpdffile(fullfilename):
+    
+    proc=subprocess.Popen(shlex.split('pdflatex '+fullfilename))
+    proc.communicate()
+    filename, fileextension = os.path.splitext(fullfilename)
+    os.unlink(filename + '.log')
 
 
 def sngbk_from_file(filename = 'sngbk.yaml'):
@@ -137,7 +146,8 @@ if __name__ == "__main__":
     logger.debug('input params')
 
     parser = argparse.ArgumentParser(description='Process some chord file...')
-    parser.add_argument('sngbk', type=str, default='sngbk.yaml', nargs='?',
+    parser.add_argument('sngbk', type=str, default='sngbk.yaml', \
+            nargs='?',\
             help='file with list of all chord files')
     # parser.add_argument('files', metavar='N', type=str, nargs='+',
     #        help='input text files with song chords')
@@ -159,16 +169,9 @@ if __name__ == "__main__":
         sys.exit()
         
     sngbk = sngbk_from_file(args.sngbk)
-    print sngbk
-    texfile(sngbk)
+    #print sngbk
+    gentexfile(sngbk, args.output)
+    genpdffile(args.output)
 
-    for arg in sys.argv:
-        logger.debug(''+arg)
 
-    logger.debug('Adresar '  )
-    #dm = Dialogmenu()
-    #print dm.retval
-
-    #filelist = training.filesindir('/home/mjirik/data/jatra-kiv/jatra-kma/jatra_5mm/','*.*')
-    #traindata(filelist)
 
