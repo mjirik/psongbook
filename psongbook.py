@@ -18,6 +18,52 @@ import pdb
 
 #print mat
 
+def genfilelist(dirpath, wildcards='*.txt', structured = True):
+    """ Function generates list of files from specific dir
+
+    filesindir(dirpath, wildcard="*.*", startpath=None)
+
+    dirpath: required directory
+    wilcard: mask for files
+    startpath: start for relative path
+
+
+    """
+
+
+    filelist = {}
+    rootdir = dirpath
+    for root, subFolders, files in os.walk(rootdir):
+        #pdb.set_trace()
+        if structured:
+            filesutf8 = []
+            # encoding to utf-8
+
+            for fileu in files:
+                #pdb.set_trace()
+                filesutf8.append(fileu.decode(sys.getfilesystemencoding()).encode('utf8')) 
+
+            #pth = os.path.join(root,fileu)
+            dirname = os.path.relpath(root,rootdir)
+            #fl={'dirname': dirname, 'files':filesutf8}
+            #filelist.append(fl)
+            filelist[dirname]=filesutf8
+        else:
+            for file in files:
+                filelist.append(os.path.join(root,file))
+    #        
+    print filelist
+    #filelist = []
+    #print dirpath
+
+    #for infile in glob.glob( os.path.join(dirpath, wildcard) ):
+    #    if startpath != None:
+    #        infile = os.path.relpath(infile, startpath)
+    #    filelist.append(infile)
+        #print "current file is: " + infile
+
+    sngbky = {'dirpath'.encode('utf8'): dirpath.encode('utf-8'), 'filelist'.encode('utf-8'):filelist }
+    return sngbky
 
 def gentexfile(sngbk, filename = 'psongbook.tex'):
     head = u'\\documentclass{article}\n\
@@ -30,16 +76,28 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
 
     docpsongbook = head#.encode('utf-8')
     #pdb.set_trace()
+    sngbkfilelist=sngbk['filelist']
 
-    for part in sngbk.keys():
-        prt=sngbk[part]
+    for part in sngbkfilelist.keys():
+        prt=sngbkfilelist[part]
         for filepath in prt:
             docpsongbook += '\n\\begin{alltt}\n'
+            #pdb.set_trace()
+            fullfilepath = os.path.join(sngbk['dirpath'].decode('utf8'),
+                    part.decode('utf8'))
+            fullfilepath = os.path.join(fullfilepath,filepath)
 
-            fl = open(filepath, 'r')
+
+            fl = open(os.path.join(fullfilepath), 'r')
             for line in fl:
                 #print line
-                line = line.decode('utf-8')
+                # TODO dection input coding
+                # TODO replacement of bad characters like \u8
+                try:
+                    line = line.decode('utf-8')
+                except:
+                    line = line.decode('cp1250')
+
                 logger.debug(line)
                 docpsongbook += line#.encode('utf-8')
             #docpsongbook += '\\input{' + filepath + '}\n'
@@ -130,7 +188,7 @@ def generate_example():
     f.write(text.encode('utf-8')) 
     f.close()
 
-    sngbk = {u'pohadky':['saxana.txt']}
+    sngbk = {u'dirpath'.encode('utf8'): './', 'filelist': {u'.'.encode('utf8'):['saxana.txt'.encode('utf8')]}}
     sngbk_to_file(sngbk)
 
 
@@ -172,6 +230,9 @@ if __name__ == "__main__":
     #print sngbk
     gentexfile(sngbk, args.output)
     genpdffile(args.output)
+
+    sngbky = genfilelist('/home/mjirik/Dropbox/akordy/nove-poradky')
+    sngbk_to_file(sngbky,'sngbk.yaml')
 
 
 
