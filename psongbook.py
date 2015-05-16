@@ -6,6 +6,8 @@ import sys
 import subprocess
 import shlex
 import os
+import fnmatch
+import traceback
 #sys.path.append("../src/")
 
 import logging
@@ -39,7 +41,7 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
             filesutf8 = []
             # encoding to utf-8
 
-            for fileu in files:
+            for fileu in fnmatch.filter(files, wildcards):
                 #pdb.set_trace()
                 filesutf8.append(fileu.decode(sys.getfilesystemencoding()).encode('utf8')) 
 
@@ -49,7 +51,7 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
             #filelist.append(fl)
             filelist[dirname]=filesutf8
         else:
-            for file in files:
+            for file in fnmatch.filter(files, wildcards):
                 filelist.append(os.path.join(root,file))
     #        
     print filelist
@@ -96,10 +98,24 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
                 try:
                     line = line.decode('utf-8')
                 except:
-                    line = line.decode('cp1250')
+                    try:
+                        line = line.decode('cp1250')
+                        print "cp 1250 " + fullfilepath
+                    except:
+                        print fullfilepath
+                        traceback.print_exc()
+
 
                 logger.debug(line)
-                docpsongbook += line#.encode('utf-8')
+                # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
+                # docpsongbook += line.encode('utf-8', 'ignore')
+                # docpsongbook += line.encode('utf-8')
+                docpsongbook += line
+                # try:
+                #     docpsongbook += line.encode('utf-8')
+                # except:
+                #     print line
+                #     traceback.print_exc()
             #docpsongbook += '\\input{' + filepath + '}\n'
             docpsongbook += '\\end{alltt}\n'
 
@@ -210,8 +226,10 @@ if __name__ == "__main__":
     # parser.add_argument('files', metavar='N', type=str, nargs='+',
     #        help='input text files with song chords')
     parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-id', '--inputdir', type=str, default=None, \
+            help='input directory')
     parser.add_argument('-o', '--output', type=str, default='psongbook.tex', \
-            help='output file') 
+            help="output tex file") 
     parser.add_argument('-e', '--example', action='store_true',\
             help='generate example chord file')
     args = parser.parse_args()
@@ -225,14 +243,18 @@ if __name__ == "__main__":
     if args.example:
         generate_example()
         sys.exit()
+
+    if args.inputdir is not None:
+        sngbky = genfilelist(args.inputdir)
+        sngbk_to_file(sngbky, args.sngbk)
+
+        # args.
         
     sngbk = sngbk_from_file(args.sngbk)
     #print sngbk
     gentexfile(sngbk, args.output)
     genpdffile(args.output)
 
-    sngbky = genfilelist('/home/mjirik/Dropbox/akordy/nove-poradky')
-    sngbk_to_file(sngbky,'sngbk.yaml')
 
 
 
