@@ -76,7 +76,7 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
 \\begin{document}\n\
 '
 
-    docpsongbook = head#.encode('utf-8')
+    docpsongbook = head.encode('utf-8')
     #pdb.set_trace()
     sngbkfilelist=sngbk['filelist']
 
@@ -109,8 +109,12 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
                 logger.debug(line)
                 # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
                 # docpsongbook += line.encode('utf-8', 'ignore')
-                # docpsongbook += line.encode('utf-8')
-                docpsongbook += line
+                try:
+                    docpsongbook += line.encode('utf-8')
+                except:
+                    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+                # docpsongbook += line
                 # try:
                 #     docpsongbook += line.encode('utf-8')
                 # except:
@@ -126,7 +130,14 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
 
     f = open(filename, 'w')
     #text = 'ahoj'
-    f.write(docpsongbook.encode('utf-8')) 
+
+    docpsongbook = docpsongbook.replace(u'\u0008'.encode('utf-8'), '')
+    docpsongbook = docpsongbook.replace("°", '')
+    docpsongbook = docpsongbook.replace("´", "'")
+    docpsongbook = docpsongbook.replace('\xef\xbb\xbf','')
+    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+    f.write(docpsongbook)
     f.close()
         
 
