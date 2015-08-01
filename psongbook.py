@@ -14,6 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import pdb
+import pandas as pd
 #pdb.set_trace()
 #import scipy.io
 #mat = scipy.io.loadmat('step0.mat')
@@ -47,6 +48,10 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
 
             #pth = os.path.join(root,fileu)
             dirname = os.path.relpath(root,rootdir)
+            filesutf8 = sort_filelist_by_author(
+                    os.path.join(rootdir, dirname), 
+                    filesutf8
+            )
             #fl={'dirname': dirname, 'files':filesutf8}
             #filelist.append(fl)
             filelist[dirname]=filesutf8
@@ -54,7 +59,10 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
             for file in fnmatch.filter(files, wildcards):
                 filelist.append(os.path.join(root,file))
     #        
-    print filelist
+    # print filelist
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+    
+
     #filelist = []
     #print dirpath
 
@@ -66,6 +74,36 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
 
     sngbky = {'dirpath'.encode('utf8'): dirpath.encode('utf-8'), 'filelist'.encode('utf-8'):filelist }
     return sngbky
+
+def sort_filelist_by_author(rootdir, filelist):
+    sngnames = []
+    sngauthors = []
+    for fl in filelist:
+        pth = os.path.join(rootdir, fl)
+
+        fl = open(pth, 'r')
+        line = fl.readline()
+        sngname, sngauthor = parse_first_line(line)
+        sngnames.append(sngname)
+        sngauthors.append(sngauthor)
+
+    fltable = {'file': filelist, 'name': sngnames, 'author': sngauthors}
+    pdfl = pd.DataFrame(fltable)
+    pdflsorted = pdfl.sort('author')
+    fltable_sorted = pdflsorted.to_dict()
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+    # return filelist
+    return fltable_sorted['file'].values()
+
+def parse_first_line(line):
+    split = line.find('-')
+    sngname = line[:split].strip()
+    sngauthor = line[split + 1:].strip()
+
+    return sngname, sngauthor
+
+
 
 def gentexfile(sngbk, filename = 'psongbook.tex'):
     head = u'\\documentclass{article}\n\
@@ -81,47 +119,56 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
     sngbkfilelist=sngbk['filelist']
 
     for part in sngbkfilelist.keys():
-        prt=sngbkfilelist[part]
-        for filepath in prt:
-            docpsongbook += '\n\\begin{alltt}\n'
-            #pdb.set_trace()
-            fullfilepath = os.path.join(sngbk['dirpath'].decode('utf8'),
-                    part.decode('utf8'))
-            fullfilepath = os.path.join(fullfilepath,filepath)
+        try:
+
+            prt = sngbkfilelist[part]
+            for filepath in prt:
+                docpsongbook += '\n\\begin{alltt}\n'
+                #pdb.set_trace()
+                fullfilepath = os.path.join(sngbk['dirpath'].decode('utf8'),
+                        part.decode('utf8'))
+                fullfilepath = os.path.join(fullfilepath,filepath)
 
 
-            fl = open(os.path.join(fullfilepath), 'r')
-            for line in fl:
-                #print line
-                # TODO dection input coding
-                # TODO replacement of bad characters like \u8
-                try:
-                    line = line.decode('utf-8')
-                except:
+                fl = open(os.path.join(fullfilepath), 'r')
+                for line in fl:
+                    #print line
+                    # TODO dection input coding
+                    # TODO replacement of bad characters like \u8
                     try:
-                        line = line.decode('cp1250')
-                        print "cp 1250 " + fullfilepath
+                        line = line.decode('utf-8')
                     except:
-                        print fullfilepath
-                        traceback.print_exc()
+                        try:
+                            line = line.decode('cp1250')
+                            print "cp 1250 " + fullfilepath
+                        except:
+                            print fullfilepath
+                            traceback.print_exc()
 
 
-                logger.debug(line)
-                # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
-                # docpsongbook += line.encode('utf-8', 'ignore')
-                try:
-                    docpsongbook += line.encode('utf-8')
-                except:
-                    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+                    logger.debug(line)
+                    # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
+                    # docpsongbook += line.encode('utf-8', 'ignore')
+                    try:
+                        docpsongbook += line.encode('utf-8')
+                    except:
+                        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
-                # docpsongbook += line
-                # try:
-                #     docpsongbook += line.encode('utf-8')
-                # except:
-                #     print line
-                #     traceback.print_exc()
-            #docpsongbook += '\\input{' + filepath + '}\n'
-            docpsongbook += '\\end{alltt}\n'
+                    # docpsongbook += line
+                    # try:
+                    #     docpsongbook += line.encode('utf-8')
+                    # except:
+                    #     print line
+                    #     traceback.print_exc()
+                #docpsongbook += '\\input{' + filepath + '}\n'
+                docpsongbook += '\\end{alltt}\n'
+                docpsongbook += '\\newpage'
+        except:
+            traceback.print_exc()
+            import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        
+
+        
 
 
     docpsongbook += '\\end{document}\n'
@@ -135,7 +182,10 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
     docpsongbook = docpsongbook.replace("°", '')
     docpsongbook = docpsongbook.replace("´", "'")
     docpsongbook = docpsongbook.replace('\xef\xbb\xbf','')
-    import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+    # hard space into normal space
+    docpsongbook = docpsongbook.replace(' ',' ')
+ 
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     f.write(docpsongbook)
     f.close()
