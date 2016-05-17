@@ -112,7 +112,7 @@ def load_file(ofilename):
     return text
 
 def _get_file_lines(fullfilepath):
-    return load_file(fullfilepath)
+    return load_file(fullfilepath).splitlines()
 
 
 def _gentexfile_for_one(fullfilepath):
@@ -130,17 +130,22 @@ def _gentexfile_for_one(fullfilepath):
     #pdb.set_trace()
 
 
-    fl = load_file(fullfilepath)
+    # fl = load_file(fullfilepath)
+    lines = _get_file_lines(fullfilepath)
+    import songparser
+    idin, idout = songparser.get_chord_line_indexes(lines)
 
-    for line in fl:
+    for i in range(len(lines)):
+        lineraw = lines[i]
+
         #print line
         # TODO dection input coding
         # TODO replacement of bad characters like \u8
         try:
-            line = line.decode('utf-8')
+            line = lineraw.decode('utf-8')
         except:
             try:
-                line = line.decode('cp1250')
+                line = lineraw.decode('cp1250')
                 print "cp 1250 " + fullfilepath
             except:
                 print fullfilepath
@@ -150,10 +155,18 @@ def _gentexfile_for_one(fullfilepath):
         logger.debug(line)
         # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
         # docpsongbook += line.encode('utf-8', 'ignore')
+
+        # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        if i in idin:
+            docpsongbook += "{\\bf"
         try:
             docpsongbook += line.encode('utf-8')
         except:
             import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+        if i in idin:
+            docpsongbook += "}"
+        docpsongbook += '\n'
 
             # docpsongbook += line
             # try:
