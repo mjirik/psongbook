@@ -111,11 +111,15 @@ def load_file(ofilename):
 
     return text
 
-def _get_file_lines(fullfilepath):
-    return load_file(fullfilepath).splitlines()
+def _get_file_lines(fullfilepath, compact_version=False):
+    lines = load_file(fullfilepath).splitlines()
+    if compact_version:
+        import songparser
+        lines = songparser.song_without_chords(lines)
+    return lines
 
 
-def _gentexfile_for_one(fullfilepath):
+def _gentexfile_for_one(fullfilepath, compact_version=False):
     """
     generate latex string for one file
     :param filepath:
@@ -131,7 +135,7 @@ def _gentexfile_for_one(fullfilepath):
 
 
     # fl = load_file(fullfilepath)
-    lines = _get_file_lines(fullfilepath)
+    lines = _get_file_lines(fullfilepath, compact_version=compact_version)
     import songparser
     idin, idout = songparser.get_chord_line_indexes(lines)
 
@@ -176,10 +180,11 @@ def _gentexfile_for_one(fullfilepath):
             #     traceback.print_exc()
     #docpsongbook += '\\input{' + filepath + '}\n'
     docpsongbook += '\\end{alltt}\n'
-    docpsongbook += '\\newpage'
+    if not compact_version:
+        docpsongbook += '\\newpage'
     return docpsongbook
 
-def gentexfile(sngbk, filename = 'psongbook.tex'):
+def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
     head = u'\\documentclass{article}\n\
 \\usepackage{a4wide}\n\
 \\usepackage[czech]{babel}\n\
@@ -202,7 +207,7 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
                 fullfilepath = os.path.join(sngbk['dirpath'].decode('utf8'),
                                             part.decode('utf8'))
                 fullfilepath = os.path.join(fullfilepath,filepath)
-                docpsongbook += _gentexfile_for_one(fullfilepath)
+                docpsongbook += _gentexfile_for_one(fullfilepath, compact_version=compact_version)
 
 
         except:
@@ -317,6 +322,7 @@ def get_parser(parser=None):
     # parser.add_argument('files', metavar='N', type=str, nargs='+',
     #        help='input text files with song chords')
     parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-c', '--compact-version', action='store_true')
     parser.add_argument('-id', '--inputdir', type=str, default=None, \
                         help='input directory')
     parser.add_argument('-o', '--output', type=str, default='psongbook.tex', \
@@ -359,7 +365,7 @@ def main_args(args):
 
     sngbk = sngbk_from_file(args.sngbk)
     #print sngbk
-    gentexfile(sngbk, args.output)
+    gentexfile(sngbk, args.output, compact_version=args.compact_version)
     genpdffile(args.output)
 
 

@@ -66,6 +66,15 @@ def split_line(line, indexes):
         rest = rest[i:]
     return split
 
+def song_without_chords(lines):
+    # lines = text.splitlines()
+    idx_out, idx_in = get_chord_line_indexes(lines)
+    newlines = []
+    for i in idx_in:
+        newlines.append(lines[i])
+
+    return newlines
+
 def main():
     logger = logging.getLogger()
 
