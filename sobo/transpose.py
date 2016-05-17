@@ -14,15 +14,18 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
+import ipdb
 
 
 def process_file(filename):
     text = load_file(filename)
+    ipdb.set_trace()
 
-def load_file(txt, ofilename):
+
+def load_file(ofilename):
     text = None
     with open(ofilename, 'r') as f:
-        text = f.read(txt)
+        text = f.read()
 
     return text
 
@@ -60,14 +63,15 @@ def main():
     # input parser
     parser = get_parser()
     args = parser.parse_args()
+    main_args(args)
 
-    process_file(args.inputfile)
 
 
 def main_args(args):
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
+    process_file(args.inputfile)
 
 
 if __name__ == "__main__":

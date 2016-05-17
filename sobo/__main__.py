@@ -49,6 +49,9 @@ def main():
     doc2txt.get_parser(parser_d2t)
     parser_sobo = subparsers.add_parser('sobo', help="generate songbook")
     psongbook.get_parser(parser_sobo)
+    parser_sobo = subparsers.add_parser('transpose', help="generate songbook")
+    import transpose
+    transpose.get_parser(parser_sobo)
     # parser.add_argument(
     #     'mode',
     #     choices=['doc2txt', 'sobo'],
@@ -72,6 +75,8 @@ def main():
         doc2txt.main_args(args)
     elif args.mode == 'sobo':
         psongbook.main_args(args)
+    elif args.mode == 'transpose':
+        transpose.main_args(args)
 
 
 

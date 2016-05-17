@@ -104,6 +104,67 @@ def parse_first_line(line):
     return sngname, sngauthor
 
 
+def load_file(ofilename):
+    text = None
+    with open(ofilename, 'r') as f:
+        text = f.read()
+
+    return text
+
+def _get_file_lines(fullfilepath):
+    return load_file(fullfilepath)
+
+
+def _gentexfile_for_one(fullfilepath):
+    """
+    generate latex string for one file
+    :param filepath:
+    :param sngbk:
+    :param part:
+    :return:
+    """
+
+    docpsongbook = ""
+
+    docpsongbook += '\n\\begin{alltt}\n'
+    #pdb.set_trace()
+
+
+    fl = load_file(fullfilepath)
+
+    for line in fl:
+        #print line
+        # TODO dection input coding
+        # TODO replacement of bad characters like \u8
+        try:
+            line = line.decode('utf-8')
+        except:
+            try:
+                line = line.decode('cp1250')
+                print "cp 1250 " + fullfilepath
+            except:
+                print fullfilepath
+                traceback.print_exc()
+
+
+        logger.debug(line)
+        # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
+        # docpsongbook += line.encode('utf-8', 'ignore')
+        try:
+            docpsongbook += line.encode('utf-8')
+        except:
+            import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+            # docpsongbook += line
+            # try:
+            #     docpsongbook += line.encode('utf-8')
+            # except:
+            #     print line
+            #     traceback.print_exc()
+    #docpsongbook += '\\input{' + filepath + '}\n'
+    docpsongbook += '\\end{alltt}\n'
+    docpsongbook += '\\newpage'
+    return docpsongbook
 
 def gentexfile(sngbk, filename = 'psongbook.tex'):
     head = u'\\documentclass{article}\n\
@@ -123,53 +184,15 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
 
             prt = sngbkfilelist[part]
             for filepath in prt:
-                docpsongbook += '\n\\begin{alltt}\n'
-                #pdb.set_trace()
                 fullfilepath = os.path.join(sngbk['dirpath'].decode('utf8'),
-                        part.decode('utf8'))
+                                            part.decode('utf8'))
                 fullfilepath = os.path.join(fullfilepath,filepath)
+                docpsongbook += _gentexfile_for_one(fullfilepath)
 
 
-                fl = open(os.path.join(fullfilepath), 'r')
-                for line in fl:
-                    #print line
-                    # TODO dection input coding
-                    # TODO replacement of bad characters like \u8
-                    try:
-                        line = line.decode('utf-8')
-                    except:
-                        try:
-                            line = line.decode('cp1250')
-                            print "cp 1250 " + fullfilepath
-                        except:
-                            print fullfilepath
-                            traceback.print_exc()
-
-
-                    logger.debug(line)
-                    # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
-                    # docpsongbook += line.encode('utf-8', 'ignore')
-                    try:
-                        docpsongbook += line.encode('utf-8')
-                    except:
-                        import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-
-                    # docpsongbook += line
-                    # try:
-                    #     docpsongbook += line.encode('utf-8')
-                    # except:
-                    #     print line
-                    #     traceback.print_exc()
-                #docpsongbook += '\\input{' + filepath + '}\n'
-                docpsongbook += '\\end{alltt}\n'
-                docpsongbook += '\\newpage'
         except:
             traceback.print_exc()
             import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-        
-
-        
-
 
     docpsongbook += '\\end{document}\n'
 
