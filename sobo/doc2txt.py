@@ -63,11 +63,27 @@ def get_output_filename(filename):
     ofilename = os.path.join(pth, ofilename)
     return ofilename
 
+def get_parser(parser=None):
+    if parser is None:
+        parser = argparse.ArgumentParser(description=__doc__)
+
+    parser.add_argument(
+        # '-i',
+        'inputfile',
+        default=None,
+        # required=True,
+        help='input file'
+    )
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Debug mode')
+    return parser
 
 def main():
     logger = logging.getLogger()
 
     logger.setLevel(logging.DEBUG)
+    # this was used as ch.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     logger.addHandler(ch)
 
@@ -81,27 +97,18 @@ def main():
     # logger.debug('start')
 
     # input parser
-    parser = argparse.ArgumentParser(
-        description=__doc__
-    )
-    parser.add_argument(
-        # '-i', 
-        'inputfile',
-        default=None,
-        # required=True,
-        help='input file'
-    )
-    parser.add_argument(
-        '-d', '--debug', action='store_true',
-        help='Debug mode')
+    parser = get_parser()
     args = parser.parse_args()
+    main_args(args)
+
+def main_args(args):
 
     if args.debug:
-        ch.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
 
     
     if os.path.isfile(args.inputfile):
-        file_processing(filename)
+        file_processing(args.inputfile)
     else:
         directory_processing(args.inputfile)
     import ipdb; ipdb.set_trace() #  noqa BREAKPOINT

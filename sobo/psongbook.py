@@ -269,10 +269,28 @@ def generate_example():
     sngbk_to_file(sngbk)
 
 
-if __name__ == "__main__":
+def get_parser(parser=None):
+    import argparse
+    if parser is None:
+        parser = argparse.ArgumentParser(description='Process some chord file...')
+    parser.add_argument('sngbk', type=str, default='sngbk.yaml', \
+                        nargs='?', \
+                        help='file with list of all chord files')
+    # parser.add_argument('files', metavar='N', type=str, nargs='+',
+    #        help='input text files with song chords')
+    parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-id', '--inputdir', type=str, default=None, \
+                        help='input directory')
+    parser.add_argument('-o', '--output', type=str, default='psongbook.tex', \
+                        help="output tex file")
+    parser.add_argument('-e', '--example', action='store_true', \
+                        help='generate example chord file')
+
+    return parser
+
+def main():
     import sys
     import Tkinter
-    import argparse
 
     logger.setLevel(logging.ERROR)
     ch = logging.StreamHandler()
@@ -280,23 +298,13 @@ if __name__ == "__main__":
 
     logger.debug('input params')
 
-    parser = argparse.ArgumentParser(description='Process some chord file...')
-    parser.add_argument('sngbk', type=str, default='sngbk.yaml', \
-            nargs='?',\
-            help='file with list of all chord files')
-    # parser.add_argument('files', metavar='N', type=str, nargs='+',
-    #        help='input text files with song chords')
-    parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('-id', '--inputdir', type=str, default=None, \
-            help='input directory')
-    parser.add_argument('-o', '--output', type=str, default='psongbook.tex', \
-            help="output tex file") 
-    parser.add_argument('-e', '--example', action='store_true',\
-            help='generate example chord file')
+    parser = get_parser()
     args = parser.parse_args()
 
     #print args
+    main_args(args)
 
+def main_args(args):
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -310,7 +318,7 @@ if __name__ == "__main__":
         sngbk_to_file(sngbky, args.sngbk)
 
         # args.
-        
+
     sngbk = sngbk_from_file(args.sngbk)
     #print sngbk
     gentexfile(sngbk, args.output)
@@ -319,3 +327,6 @@ if __name__ == "__main__":
 
 
 
+
+if __name__ == "__main__":
+    main()
