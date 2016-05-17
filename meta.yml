@@ -59,7 +59,7 @@ test:
     # - nose
 
 about:
-  home: https://github.com/mjirik/disco
+  home: https://github.com/mjirik/sobo
   license: BSD License
   summary: 'distribution to pypi and conda'
 
