@@ -158,7 +158,7 @@ def _gentexfile_for_one(fullfilepath):
 
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
         if i in idin:
-            docpsongbook += "{\\bf"
+            docpsongbook += "\\textbf{"
         try:
             docpsongbook += line.encode('utf-8')
         except:
@@ -184,6 +184,8 @@ def gentexfile(sngbk, filename = 'psongbook.tex'):
 \\usepackage{a4wide}\n\
 \\usepackage[czech]{babel}\n\
 \\usepackage[utf8]{inputenc}\n\
+\\usepackage[T1]{fontenc}\n\
+\\usepackage{libertine}\n\
 \\usepackage{alltt}\n\
 \\begin{document}\n\
 '
