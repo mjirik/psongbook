@@ -264,7 +264,15 @@ def sngbk_to_file(sngbk, filename = 'sngbk.yaml'):
     f.close
 
 
-def generate_example():
+def generate_example(path=""):
+    import os
+    import os.path as op
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+
     text = u'Saxana - z filmu Saxana\n\
 \n\
    A D A   F#mi                   E\n\
@@ -303,13 +311,16 @@ def generate_example():
 \n\
 1: Saxano ... (Jen první část)\n\
 '
-    f = open('saxana.txt', 'w')
+    sax_fn = op.join(path,"saxana.txt")
+    sb_fn = op.join(path,"sngbk.yaml")
+
+    f = open(sax_fn, 'w')
     #text = 'ahoj'
     f.write(text.encode('utf-8')) 
     f.close()
 
-    sngbk = {u'dirpath'.encode('utf8'): './', 'filelist': {u'.'.encode('utf8'):['saxana.txt'.encode('utf8')]}}
-    sngbk_to_file(sngbk)
+    sngbk = {u'dirpath'.encode('utf8'): path, 'filelist': {u'.'.encode('utf8'):[sax_fn.encode('utf8')]}}
+    sngbk_to_file(sngbk, filename=sb_fn)
 
 
 def get_parser(parser=None):

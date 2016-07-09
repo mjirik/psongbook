@@ -17,6 +17,34 @@ import argparse
 import copy
 import re
 
+class SongParser:
+    def __init__(self, lines):
+        self.lines_raw = lines
+        self.parse_name_and_artist()
+        lines = lines[1:]
+        self.lines_no_chords = song_without_chords(lines)
+        self.lines = lines
+
+
+
+    def parse_name_and_artist(self):
+        text = self.lines_raw[0]
+        self.name = text
+        self.artist = ""
+
+        try:
+            # convert long dash into short dash
+            text = text.replace(" – ", " - ")
+
+            spl = text.split("-")
+            self.name = spl[0].strip()
+            self.artist = spl[1].strip()
+        except:
+            logger.warning("Cannot parse song name and artist from first line")
+            pass
+
+
+
 def get_chord_line_indexes(lines):
     regex = "^ *( *[A-H][#b]?[^ ]*)+ *$"
     is_chord_line_re = re.compile(regex)
