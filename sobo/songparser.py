@@ -16,14 +16,41 @@ logger = logging.getLogger(__name__)
 import argparse
 import copy
 import re
+import traceback
 
 class SongParser:
     def __init__(self, lines):
+        lines = self.coding(lines)
         self.lines_raw = lines
         self.parse_name_and_artist()
         lines = lines[1:]
         self.lines_no_chords = song_without_chords(lines)
         self.lines = lines
+        chli, nchli = get_chord_line_indexes(self.lines)
+        self.chord_line_indexes = chli
+        self.no_chord_line_indexes = chli
+
+    def coding(self, lines):
+        lines_new = []
+
+        for i in range(len(lines)):
+            lineraw = lines[i]
+
+            #print line
+            # TODO dection input coding
+            # TODO replacement of bad characters like \u8
+            try:
+                line = lineraw.decode('utf-8')
+            except:
+                try:
+                    line = lineraw.decode('cp1250')
+                    #print "cp 1250 " + fullfilepath
+                except:
+                    # print fullfilepath
+                    traceback.print_exc()
+            line = line.encode("utf-8")
+            lines_new.append(line)
+        return lines_new
 
 
 

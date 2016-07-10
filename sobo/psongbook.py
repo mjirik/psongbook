@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 import pdb
 import pandas as pd
+import re
 #pdb.set_trace()
 #import scipy.io
 #mat = scipy.io.loadmat('step0.mat')
@@ -111,12 +112,12 @@ def load_file(ofilename):
 
     return text
 
-def _get_file_lines(fullfilepath, compact_version=False):
+def _parse_file(fullfilepath):
     lines = load_file(fullfilepath).splitlines()
-    if compact_version:
-        import songparser
-        lines = songparser.song_without_chords(lines)
-    return lines
+    import songparser
+    song = songparser.SongParser(lines)
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+    return song
 
 
 def _gentexfile_for_one(fullfilepath, compact_version=False):
@@ -130,12 +131,20 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
 
     docpsongbook = ""
 
+    song = _parse_file(fullfilepath)
+
+    headline = song.name.decode("utf8") + " - " + song.artist.decode("utf8")
+    docpsongbook += ("\n\\section{" + headline + "}\n").encode("utf8")
     docpsongbook += '\n\\begin{alltt}\n'
     #pdb.set_trace()
 
 
     # fl = load_file(fullfilepath)
-    lines = _get_file_lines(fullfilepath, compact_version=compact_version)
+    if compact_version:
+        lines = song.lines_no_chords
+        # lines = songparser.song_without_chords(lines)
+    else:
+        lines = song.lines
     import songparser
     idin, idout = songparser.get_chord_line_indexes(lines)
 
@@ -154,7 +163,6 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
             except:
                 print fullfilepath
                 traceback.print_exc()
-
 
         logger.debug(line)
         # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
@@ -193,6 +201,7 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
 \\usepackage{libertine}\n\
 \\usepackage{alltt}\n\
 \\begin{document}\n\
+\\tableofcontents\n\
 '
 
     docpsongbook = head.encode('utf-8')
@@ -221,18 +230,42 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
     f = open(filename, 'w')
     #text = 'ahoj'
 
+    docpsongbook = replace_latex_bad_character(docpsongbook)
+
+    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+
+    f.write(docpsongbook)
+    f.close()
+
+
+def replace_latex_bad_character(text):
+    """
+    :param text: string or list of strings
+    :return:
+    """
+
+    if type(text) == list:
+        new_text = []
+        for line in text:
+            new_text.append(_replace_latex_bad_character_one_string(line))
+    else:
+        new_text = _replace_latex_bad_character_one_string(text)
+
+    return new_text
+
+
+def _replace_latex_bad_character_one_string(docpsongbook):
     docpsongbook = docpsongbook.replace(u'\u0008'.encode('utf-8'), '')
     docpsongbook = docpsongbook.replace("°", '')
     docpsongbook = docpsongbook.replace("´", "'")
     docpsongbook = docpsongbook.replace('\xef\xbb\xbf','')
     # hard space into normal space
     docpsongbook = docpsongbook.replace(' ',' ')
- 
-    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+    docpsongbook = docpsongbook.replace('$','\$')
+    docpsongbook = re.sub(r"(.[^\\])&", r"\1\\&", docpsongbook)
+    # docpsongbook = re.sub(r"(.[^\\])\$", r"\1\$", docpsongbook)
+    return docpsongbook
 
-    f.write(docpsongbook)
-    f.close()
-        
 
 def genpdffile(fullfilename):
     
