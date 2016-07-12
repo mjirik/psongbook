@@ -16,9 +16,11 @@ logger = logging.getLogger(__name__)
 import pdb
 import pandas as pd
 import re
+import sort
 #pdb.set_trace()
 #import scipy.io
 #mat = scipy.io.loadmat('step0.mat')
+import inout
 
 #print mat
 
@@ -49,7 +51,7 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
 
             #pth = os.path.join(root,fileu)
             dirname = os.path.relpath(root,rootdir)
-            filesutf8 = sort_filelist_by_author(
+            filesutf8 = sort.sort_filelist_by_author(
                     os.path.join(rootdir, dirname), 
                     filesutf8
             )
@@ -76,46 +78,12 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
     sngbky = {'dirpath'.encode('utf8'): dirpath.encode('utf-8'), 'filelist'.encode('utf-8'):filelist }
     return sngbky
 
-def sort_filelist_by_author(rootdir, filelist):
-    sngnames = []
-    sngauthors = []
-    for fl in filelist:
-        pth = os.path.join(rootdir, fl)
 
-        fl = open(pth, 'r')
-        line = fl.readline()
-        sngname, sngauthor = parse_first_line(line)
-        sngnames.append(sngname)
-        sngauthors.append(sngauthor)
-
-    fltable = {'file': filelist, 'name': sngnames, 'author': sngauthors}
-    pdfl = pd.DataFrame(fltable)
-    pdflsorted = pdfl.sort('author')
-    fltable_sorted = pdflsorted.to_dict()
-    # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
-
-    # return filelist
-    return fltable_sorted['file'].values()
-
-def parse_first_line(line):
-    split = line.find('-')
-    sngname = line[:split].strip()
-    sngauthor = line[split + 1:].strip()
-
-    return sngname, sngauthor
-
-
-def load_file(ofilename):
-    text = None
-    with open(ofilename, 'r') as f:
-        text = f.read()
-
-    return text
 
 def _parse_file(fullfilepath):
-    lines = load_file(fullfilepath).splitlines()
+    lines = inout.load_file(fullfilepath).splitlines()
     import songparser
-    song = songparser.SongParser(lines)
+    song = songparser.SongParser(lines, filename=fullfilepath)
     # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
     return song
 
@@ -133,8 +101,9 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
 
     song = _parse_file(fullfilepath)
 
-    headline = song.name.decode("utf8") + " - " + song.artist.decode("utf8")
-    docpsongbook += ("\n\\section{" + headline + "}\n").encode("utf8")
+    # headline = song.name.decode("utf8") + " - " + song.artist.decode("utf8")
+    headline = song.name + " - " + song.artist
+    docpsongbook += "\n\\section{" + headline + "}\n"
     docpsongbook += '\n\\begin{alltt}\n'
     #pdb.set_trace()
 
@@ -154,27 +123,31 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
         #print line
         # TODO dection input coding
         # TODO replacement of bad characters like \u8
-        try:
-            line = lineraw.decode('utf-8')
-        except:
-            try:
-                line = lineraw.decode('cp1250')
-                print "cp 1250 " + fullfilepath
-            except:
-                print fullfilepath
-                traceback.print_exc()
 
-        logger.debug(line)
+        # try:
+        #     line = lineraw.decode('utf-8')
+        # except:
+        #     try:
+        #         line = lineraw.decode('cp1250')
+        #         print "cp 1250 " + fullfilepath
+        #     except:
+        #         print fullfilepath
+        #         traceback.print_exc()
+
+        line = lineraw
+        # logger.debug(line)
         # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
         # docpsongbook += line.encode('utf-8', 'ignore')
 
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
         if i in idin:
             docpsongbook += "\\textbf{"
-        try:
-            docpsongbook += line.encode('utf-8')
-        except:
-            import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        # try:
+        #     docpsongbook += line.encode('utf-8')
+        # except:
+        #     import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+        docpsongbook += line
+
 
         if i in idin:
             docpsongbook += "}"
@@ -216,7 +189,13 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
                 fullfilepath = os.path.join(sngbk['dirpath'].decode('utf8'),
                                             part.decode('utf8'))
                 fullfilepath = os.path.join(fullfilepath,filepath)
-                docpsongbook += _gentexfile_for_one(fullfilepath, compact_version=compact_version)
+                onefile_tex_unicode = _gentexfile_for_one(fullfilepath, compact_version=compact_version)
+
+                try:
+                    docpsongbook += onefile_tex_unicode.encode("utf-8")
+                except:
+                    traceback.print_exc()
+                    print "problem with file: ", fullfilepath
 
 
         except:

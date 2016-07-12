@@ -17,10 +17,22 @@ import argparse
 import copy
 import re
 import traceback
+import inout
 
 class SongParser:
-    def __init__(self, lines):
-        lines = self.coding(lines)
+    def __init__(self, song, filename=""):
+        """
+
+        :param song: filepath or list of lines
+        :param filename:
+        """
+        if type(song) is list:
+            lines = song
+        else:
+            lines = inout.load_file(song).splitlines()
+            filename = song
+        self.filename = filename
+        #lines = self.coding(lines)
         self.lines_raw = lines
         self.parse_name_and_artist()
         lines = lines[1:]
@@ -48,7 +60,8 @@ class SongParser:
                 except:
                     # print fullfilepath
                     traceback.print_exc()
-            line = line.encode("utf-8")
+                    logger.warning(self.filename)
+            #line = line.encode("utf-8")
             lines_new.append(line)
         return lines_new
 
@@ -56,19 +69,30 @@ class SongParser:
 
     def parse_name_and_artist(self):
         text = self.lines_raw[0]
-        self.name = text
-        self.artist = ""
+        if len(text.strip()) == 0:
+            text = self.lines_raw[1]
+
+        name, artist = self.__parse_name_and_artist_from_line(text)
+        self.name = name
+        self.artist = artist
+
+    def __parse_name_and_artist_from_line(self, text):
+        name = text
+        artist = ""
 
         try:
             # convert long dash into short dash
-            text = text.replace(" – ", " - ")
+            text = text.replace("–".decode("utf-8"), "-")
 
             spl = text.split("-")
-            self.name = spl[0].strip()
-            self.artist = spl[1].strip()
+            name = spl[0].strip()
+            artist = spl[1].strip()
         except:
-            logger.warning("Cannot parse song name and artist from first line")
-            pass
+            traceback.print_exc()
+            logger.warning("Cannot parse song name and artist from first line\n" + text +"\n" + self.filename)
+            #import ipdb; ipdb.set_trace()
+
+        return name, artist
 
 
 
