@@ -102,7 +102,7 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     song = _parse_file(fullfilepath)
 
     # headline = song.name.decode("utf8") + " - " + song.artist.decode("utf8")
-    headline = song.name + " - " + song.artist
+    headline = song.name + " \- " + song.artist
     docpsongbook += "\n\\section{" + headline + "}\n"
     docpsongbook += '\n\\begin{alltt}\n'
     #pdb.set_trace()
