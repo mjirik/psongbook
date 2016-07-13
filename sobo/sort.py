@@ -60,9 +60,10 @@ def artist_name_preprocessing(artist):
 
         if in_braces is not None:
             artist = in_braces.group() + " " + artist
-        artist.replace("(", " ")
-        artist.replace(")", " ")
-        artist.replace(";", " ")
-        artist.replace("  ", " ")
+            #import ipdb; ipdb.set_trace()
+        artist = artist.replace("(", " ")
+        artist = artist.replace(")", " ")
+        artist = artist.replace(";", " ")
+        artist = artist.replace("  ", " ")
     return artist
 

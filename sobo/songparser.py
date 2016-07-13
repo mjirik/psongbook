@@ -18,6 +18,7 @@ import copy
 import re
 import traceback
 import inout
+import sort
 
 class SongParser:
     def __init__(self, song, filename=""):
@@ -41,6 +42,7 @@ class SongParser:
         chli, nchli = get_chord_line_indexes(self.lines)
         self.chord_line_indexes = chli
         self.no_chord_line_indexes = chli
+        self.artist_preprocessed = sort.artist_name_preprocessing(self.artist)
 
     def coding(self, lines):
         lines_new = []

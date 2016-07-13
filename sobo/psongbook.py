@@ -102,8 +102,8 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     song = _parse_file(fullfilepath)
 
     # headline = song.name.decode("utf8") + " - " + song.artist.decode("utf8")
-    headline = song.name + " \- " + song.artist
-    docpsongbook += "\n\\section{" + headline + "}\n"
+    headline = song.name + " \- " + song.artist_preprocessed
+    docpsongbook += "\n\\subsection{" + headline + "}\n"
     docpsongbook += '\n\\begin{alltt}\n'
     #pdb.set_trace()
 
@@ -175,6 +175,7 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
 \\usepackage{alltt}\n\
 \\begin{document}\n\
 \\tableofcontents\n\
+\\newpage\n\
 '
 
     docpsongbook = head.encode('utf-8')
@@ -182,6 +183,7 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
     sngbkfilelist=sngbk['filelist']
 
     for part in sngbkfilelist.keys():
+        docpsongbook += "\\section{" + part.encode("utf8") + "}\n"
         try:
 
             prt = sngbkfilelist[part]
