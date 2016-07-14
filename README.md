@@ -1,7 +1,7 @@
 sobo
 =========
 
-Song book creator written in python. Input is directory with `.txt` files. Output is one pdf file.
+Song book creator written in python. Input is a directory with `.txt` files. Output is one pdf file.
 
 [Example of output songbook](https://www.dropbox.com/s/t8xbr9qhtt7wuc8/psongbook.pdf?dl=0)
 
