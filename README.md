@@ -3,7 +3,7 @@ sobo
 
 Song book creator written in python. Input is a directory with `.txt` files. Output is one pdf file.
 
-[Example of output songbook](https://www.dropbox.com/s/t8xbr9qhtt7wuc8/psongbook.pdf?dl=0)
+[Example of output songbook PDF file](https://www.dropbox.com/s/t8xbr9qhtt7wuc8/psongbook.pdf?dl=0)
 
 
 Prereq
@@ -38,6 +38,6 @@ String for sorting from our previous example is then: `Optional Band Name Artist
         
         
 
-[Example of input data](https://www.dropbox.com/s/xrf9jkqwrjg2f5b/nove-poradky.zip?dl=0)
+[Example of input data directory](https://www.dropbox.com/s/xrf9jkqwrjg2f5b/nove-poradky.zip?dl=0)
 
         
