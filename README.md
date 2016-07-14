@@ -1,4 +1,4 @@
-psongbook
+sobo
 =========
 
 Song book creator written in python. Input is directory with `.txt` files. Output is one pdf file.
@@ -24,6 +24,11 @@ To generate pdf songbook use:
 Every song in input data is stored into `.txt` file. First line of this file contain song name and artist namefile separated with dash symbol. 
 
     Song name - Artist Name (Optional Band)
+    
+    C     G    D
+    This is text of song
+    C        G      D
+    This is second line
         
 Files are organized into subdirectories based on genre. In genre are song sorted by artist name. 
 Sorting algorithm use reverse order of words. This means that last name is used on first place. 
