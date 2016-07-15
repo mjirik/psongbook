@@ -101,10 +101,16 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
 
     song = _parse_file(fullfilepath)
 
-    # headline = song.name.decode("utf8") + " - " + song.artist.decode("utf8")
-    headline = song.name + " \- " + song.artist_preprocessed
-    docpsongbook += "\n\\subsection{" + headline + "}\n"
-    docpsongbook += '\n\\begin{alltt}\n'
+    # title = song.name.decode("utf8") + " - " + song.artist.decode("utf8")
+    #title = song.name + " : " + song.artist_preprocessed
+    title = song.name + " : " + song.artist
+    shorttitle = song.name
+    # docpsongbook += "\n{\\nopagebreak[4]"
+    docpsongbook += "\n\\Needspace*{15\\baselineskip}\n"
+    #docpsongbook += "\n\\begin{samepage}\n"
+    docpsongbook += "\\subsection[" + shorttitle + "]{" + title + "}\n"
+    #docpsongbook += '\n\\nopagebreak[3]\n'
+    docpsongbook += '\\begin{alltt}\n'
     #pdb.set_trace()
 
 
@@ -161,8 +167,14 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
             #     traceback.print_exc()
     #docpsongbook += '\\input{' + filepath + '}\n'
     docpsongbook += '\\end{alltt}\n'
+
+    #docpsongbook += "\\end{samepage}\n"
+    # nopagebreak closing
+    # docpsongbook += "}"
     if not compact_version:
-        docpsongbook += '\\newpage'
+        #docpsongbook += '\\newpage\n'
+        docpsongbook += '\\pagebreak[3]\n'
+        pass
     return docpsongbook
 
 def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
@@ -173,6 +185,7 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
 \\usepackage[T1]{fontenc}\n\
 \\usepackage{libertine}\n\
 \\usepackage{alltt}\n\
+\\usepackage{needspace}\n\
 \\begin{document}\n\
 \\tableofcontents\n\
 \\newpage\n\
@@ -238,6 +251,7 @@ def replace_latex_bad_character(text):
 def _replace_latex_bad_character_one_string(docpsongbook):
     docpsongbook = docpsongbook.replace(u'\u0008'.encode('utf-8'), '')
     docpsongbook = docpsongbook.replace("°", '')
+    docpsongbook = docpsongbook.replace("_", '\\_')
     docpsongbook = docpsongbook.replace("´", "'")
     docpsongbook = docpsongbook.replace('\xef\xbb\xbf','')
     # hard space into normal space
