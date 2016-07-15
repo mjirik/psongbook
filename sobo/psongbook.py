@@ -112,9 +112,6 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     #docpsongbook += '\n\\nopagebreak[3]\n'
     docpsongbook += '\\begin{alltt}\n'
     #pdb.set_trace()
-
-
-    # fl = load_file(fullfilepath)
     if compact_version:
         lines = song.lines_no_chords
         # lines = songparser.song_without_chords(lines)
@@ -126,46 +123,15 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     for i in range(len(lines)):
         lineraw = lines[i]
 
-        #print line
-        # TODO dection input coding
-        # TODO replacement of bad characters like \u8
-
-        # try:
-        #     line = lineraw.decode('utf-8')
-        # except:
-        #     try:
-        #         line = lineraw.decode('cp1250')
-        #         print "cp 1250 " + fullfilepath
-        #     except:
-        #         print fullfilepath
-        #         traceback.print_exc()
-
         line = lineraw
-        # logger.debug(line)
-        # docpsongbook += line.encode('utf-8', 'xmlcharrefreplace')
-        # docpsongbook += line.encode('utf-8', 'ignore')
-
         # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
         if i in idin:
             docpsongbook += "\\textbf{"
-        # try:
-        #     docpsongbook += line.encode('utf-8')
-        # except:
-        #     import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
         docpsongbook += line
-
 
         if i in idin:
             docpsongbook += "}"
         docpsongbook += '\n'
-
-            # docpsongbook += line
-            # try:
-            #     docpsongbook += line.encode('utf-8')
-            # except:
-            #     print line
-            #     traceback.print_exc()
-    #docpsongbook += '\\input{' + filepath + '}\n'
     docpsongbook += '\\end{alltt}\n'
 
     #docpsongbook += "\\end{samepage}\n"
@@ -178,7 +144,13 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     return docpsongbook
 
 def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
-    head = u'\\documentclass{article}\n\
+    head = u""
+    if compact_version:
+        head += u"\\documentclass[8pt]{article}\n"
+    else:
+        head += u"\\documentclass{article}\n"
+
+    head += u'\
 \\usepackage{a4wide}\n\
 \\usepackage[czech]{babel}\n\
 \\usepackage[utf8]{inputenc}\n\
