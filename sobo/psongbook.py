@@ -106,7 +106,10 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     title = song.name + " : " + song.artist
     shorttitle = song.name
     # docpsongbook += "\n{\\nopagebreak[4]"
-    docpsongbook += "\n\\Needspace*{15\\baselineskip}\n"
+    if compact_version:
+        docpsongbook += "\n\\Needspace*{5\\baselineskip}\n"
+    else:
+        docpsongbook += "\n\\Needspace*{15\\baselineskip}\n"
     #docpsongbook += "\n\\begin{samepage}\n"
     docpsongbook += "\\subsection[" + shorttitle + "]{" + title + "}\n"
     #docpsongbook += '\n\\nopagebreak[3]\n'
@@ -146,7 +149,7 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
 def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
     head = u""
     if compact_version:
-        head += u"\\documentclass[8pt]{article}\n"
+        head += u"\\documentclass[7pt]{article}\n"
     else:
         head += u"\\documentclass{article}\n"
 
