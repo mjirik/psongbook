@@ -111,7 +111,8 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     else:
         docpsongbook += "\n\\Needspace*{15\\baselineskip}\n"
     #docpsongbook += "\n\\begin{samepage}\n"
-    docpsongbook += "\\subsection[" + shorttitle + "]{" + title + "}\n"
+    docpsongbook += "\\subsection{" + title + "}\n"
+    # docpsongbook += "\\subsection[" + shorttitle + "]{" + title + "}\n"
     #docpsongbook += '\n\\nopagebreak[3]\n'
     docpsongbook += '\\begin{alltt}\n'
     #pdb.set_trace()
@@ -141,8 +142,8 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
     # nopagebreak closing
     # docpsongbook += "}"
     if not compact_version:
-        #docpsongbook += '\\newpage\n'
-        docpsongbook += '\\pagebreak[3]\n'
+        docpsongbook += '\\newpage\n'
+        # docpsongbook += '\\pagebreak[3]\n'
         pass
     return docpsongbook
 
