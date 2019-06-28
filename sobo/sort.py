@@ -32,7 +32,7 @@ def sort_filelist_by_author(rootdir, filelist):
 
     fltable = {'file': filelist, 'name': sngnames, 'author': sngauthors}
     pdfl = pd.DataFrame(fltable)
-    pdflsorted = pdfl.sort('author')
+    pdflsorted = pdfl.sort_values('author')
     fltable_sorted = pdflsorted.reset_index(drop=True).to_dict()
     #import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 

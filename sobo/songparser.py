@@ -84,7 +84,8 @@ class SongParser:
 
         try:
             # convert long dash into short dash
-            text = text.replace("–".decode("utf-8"), "-")
+            # text = text.replace("–".decode("utf-8"), "-")
+            text = text.replace("–", "-")
 
             spl = text.split("-")
             name = spl[0].strip()

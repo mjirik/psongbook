@@ -21,10 +21,11 @@ import sort
 #import scipy.io
 #mat = scipy.io.loadmat('step0.mat')
 import inout
+from pathlib import Path
 
 #print mat
 
-def genfilelist(dirpath, wildcards='*.txt', structured = True):
+def genfilelist(dirpath, wildcards='*.txt', structured = True, decode_filenames=False):
     """ Function generates list of files from specific dir
 
     filesindir(dirpath, wildcard="*.*", startpath=None)
@@ -35,6 +36,10 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
 
 
     """
+    if not Path(dirpath).exists():
+        logger.error(f"Path '{dirpath}' does not exist.")
+        exit()
+
 
 
     filelist = {}
@@ -46,15 +51,19 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
             # encoding to utf-8
 
             for fileu in fnmatch.filter(files, wildcards):
-                #pdb.set_trace()
-                filesutf8.append(fileu.decode(sys.getfilesystemencoding()).encode('utf8')) 
+                # pdb.set_trace()
+
+                if decode_filenames:
+                    fileu = fileu.decode(sys.getfilesystemencoding()).encode('utf8')
+
+                filesutf8.append(fileu)
 
             #pth = os.path.join(root,fileu)
             dirname = os.path.relpath(root,rootdir)
-            filesutf8 = sort.sort_filelist_by_author(
+            filesutf8 = list(sort.sort_filelist_by_author(
                     os.path.join(rootdir, dirname), 
                     filesutf8
-            )
+            ))
             #fl={'dirname': dirname, 'files':filesutf8}
             #filelist.append(fl)
             filelist[dirname]=filesutf8
@@ -75,7 +84,8 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True):
     #    filelist.append(infile)
         #print "current file is: " + infile
 
-    sngbky = {'dirpath'.encode('utf8'): dirpath.encode('utf-8'), 'filelist'.encode('utf-8'):filelist }
+    # sngbky = {'dirpath'.encode('utf8'): dirpath.encode('utf-8'), 'filelist'.encode('utf-8'):filelist }
+    sngbky = {'dirpath': dirpath, 'filelist':filelist }
     return sngbky
 
 
@@ -167,26 +177,28 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
 \\newpage\n\
 '
 
-    docpsongbook = head.encode('utf-8')
+    docpsongbook = head
     #pdb.set_trace()
     sngbkfilelist=sngbk['filelist']
+    print("Compact version? ", compact_version)
 
     for part in sngbkfilelist.keys():
-        docpsongbook += "\\section{" + part.encode("utf8") + "}\n"
+        docpsongbook += "\\section{" + part + "}\n"
         try:
 
             prt = sngbkfilelist[part]
             for filepath in prt:
-                fullfilepath = os.path.join(sngbk['dirpath'].decode('utf8'),
-                                            part.decode('utf8'))
+                fullfilepath = os.path.join(sngbk['dirpath'],
+                                            part)
                 fullfilepath = os.path.join(fullfilepath,filepath)
+                print("processing file: ", fullfilepath)
                 onefile_tex_unicode = _gentexfile_for_one(fullfilepath, compact_version=compact_version)
 
                 try:
-                    docpsongbook += onefile_tex_unicode.encode("utf-8")
+                    docpsongbook += onefile_tex_unicode
                 except:
                     traceback.print_exc()
-                    print "problem with file: ", fullfilepath
+                    print("problem with file: ", fullfilepath)
 
 
         except:
@@ -197,13 +209,14 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
 
     logger.debug( docpsongbook)
 
-    f = open(filename, 'w')
+    f = open(filename, 'w', encoding="utf8")
     #text = 'ahoj'
 
     docpsongbook = replace_latex_bad_character(docpsongbook)
 
     # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
+    docpsongbook.replace("\ufeff", "")
     f.write(docpsongbook)
     f.close()
 
@@ -225,7 +238,7 @@ def replace_latex_bad_character(text):
 
 
 def _replace_latex_bad_character_one_string(docpsongbook):
-    docpsongbook = docpsongbook.replace(u'\u0008'.encode('utf-8'), '')
+    docpsongbook = docpsongbook.replace(u'\u0008', '')
     docpsongbook = docpsongbook.replace("°", '')
     docpsongbook = docpsongbook.replace("_", '\\_')
     docpsongbook = docpsongbook.replace("´", "'")
@@ -262,10 +275,12 @@ def sngbk_to_file(sngbk, filename = 'sngbk.yaml'):
 
     # write to yaml
 
-    import yaml
-    f = open(filename, 'w')
-    yaml.dump(sngbk,f)
-    f.close
+    from ruamel.yaml import YAML
+    yaml = YAML()
+    # import ipdb; ipdb.set_trace()
+    with open(filename, 'w', encoding="utf-8") as f:
+        yaml.dump(sngbk, f)
+    # f.close
 
 
 def generate_example(path=""):
@@ -277,7 +292,7 @@ def generate_example(path=""):
 
 
 
-    text = u'Saxana - z filmu Saxana\n\
+    text = 'Saxana - z filmu Saxana\n\
 \n\
    A D A   F#mi                   E\n\
 1: Saxano, v knihách vázaných v kůži\n\
@@ -318,12 +333,13 @@ def generate_example(path=""):
     sax_fn = op.join(path,"saxana.txt")
     sb_fn = op.join(path,"sngbk.yaml")
 
-    f = open(sax_fn, 'w')
+    f = open(sax_fn, 'w', encoding="utf-8")
     #text = 'ahoj'
-    f.write(text.encode('utf-8')) 
+    f.write(text)
     f.close()
 
-    sngbk = {u'dirpath'.encode('utf8'): path, 'filelist': {u'.'.encode('utf8'):[sax_fn.encode('utf8')]}}
+    # sngbk = {u'dirpath'.encode('utf8'): path, 'filelist': {u'.'.encode('utf8'):[sax_fn.encode('utf8')]}}
+    sngbk = {'dirpath': path, 'filelist': {'.':[sax_fn]}}
     sngbk_to_file(sngbk, filename=sb_fn)
 
 
@@ -382,8 +398,6 @@ def main_args(args):
     #print sngbk
     gentexfile(sngbk, args.output, compact_version=args.compact_version)
     genpdffile(args.output)
-
-
 
 
 

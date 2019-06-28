@@ -6,7 +6,7 @@ import traceback
 
 def load_file(ofilename):
     text = None
-    with open(ofilename, 'r') as f:
+    with open(ofilename, 'rb') as f:
         textraw = f.read()
 
     try:
