@@ -4,9 +4,9 @@
 import logging
 logger = logging.getLogger(__name__)
 import os.path
-import yaml
+# import yaml
 import pandas as pd
-import songparser
+from . import songparser
 
 artist_replace = {
 

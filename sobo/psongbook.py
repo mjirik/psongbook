@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 import pdb
 import pandas as pd
 import re
-import sort
+from . import sort
 #pdb.set_trace()
 #import scipy.io
 #mat = scipy.io.loadmat('step0.mat')
-import inout
+from . import inout
 from pathlib import Path
 
 #print mat
@@ -37,9 +37,16 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True, decode_filenames=
 
     """
     if not Path(dirpath).exists():
+
         logger.error(f"Path '{dirpath}' does not exist.")
         exit()
 
+    if Path(dirpath).is_file():
+        logger.error(f"Path '{dirpath}' should be directory.")
+        exit()
+
+    # # dirpath = Path(dirpath)
+    #
 
 
     filelist = {}
@@ -92,7 +99,7 @@ def genfilelist(dirpath, wildcards='*.txt', structured = True, decode_filenames=
 
 def _parse_file(fullfilepath):
     lines = inout.load_file(fullfilepath).splitlines()
-    import songparser
+    from . import songparser
     song = songparser.SongParser(lines, filename=fullfilepath)
     # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
     return song
@@ -131,7 +138,7 @@ def _gentexfile_for_one(fullfilepath, compact_version=False):
         # lines = songparser.song_without_chords(lines)
     else:
         lines = song.lines
-    import songparser
+    from . import songparser
     idin, idout = songparser.get_chord_line_indexes(lines)
 
     for i in range(len(lines)):
@@ -203,7 +210,7 @@ def gentexfile(sngbk, filename = 'psongbook.tex', compact_version=False):
 
         except:
             traceback.print_exc()
-            import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
+            # import ipdb; ipdb.set_trace() #  noqa BREAKPOINT
 
     docpsongbook += '\\end{document}\n'
 
@@ -397,8 +404,6 @@ def main_args(args):
     sngbk = sngbk_from_file(args.sngbk)
     #print sngbk
     gentexfile(sngbk, args.output, compact_version=args.compact_version)
-    genpdffile(args.output)
-
 
 
 if __name__ == "__main__":

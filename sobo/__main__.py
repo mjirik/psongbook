@@ -18,8 +18,8 @@ import glob
 import fnmatch
 
 import os
-import doc2txt
-import psongbook
+from . import doc2txt
+from . import psongbook
 
 def main():
     logger = logging.getLogger()
@@ -50,7 +50,7 @@ def main():
     parser_sobo = subparsers.add_parser('sobo', help="generate songbook")
     psongbook.get_parser(parser_sobo)
     parser_sobo = subparsers.add_parser('transpose', help="generate songbook")
-    import transpose
+    from . import transpose
     transpose.get_parser(parser_sobo)
     # parser.add_argument(
     #     'mode',

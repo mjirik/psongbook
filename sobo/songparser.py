@@ -17,8 +17,8 @@ import argparse
 import copy
 import re
 import traceback
-import inout
-import sort
+from . import inout
+from . import sort
 
 class SongParser:
     def __init__(self, song, filename=""):

@@ -14,12 +14,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 import argparse
-import ipdb
+# import ipdb
 
 
 def process_file(filename):
     text = load_file(filename)
-    ipdb.set_trace()
+    # ipdb.set_trace()
 
 
 def load_file(ofilename):

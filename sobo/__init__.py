@@ -1,2 +1,2 @@
-import doc2txt
-import psongbook
+from . import doc2txt
+from . import psongbook
