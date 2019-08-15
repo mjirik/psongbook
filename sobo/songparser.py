@@ -98,9 +98,15 @@ class SongParser:
         return name, artist
 
 
-
 def get_chord_line_indexes(lines):
-    regex = "^ *( *[A-H][#b]?[^ ]*)+ *$"
+    # regex = "^ *( *[A-H][#b]?[^ ]*)+ *$"
+    # regex = r"^ *( *[A-H][#b]?[^ \n]*| *\(.*\)[^ \n]*)+ *$"
+
+    # First part in group before '|' is the chord. The second part is comment in '()'
+    # ^([A-Z].*:)?            is Ref:
+    #  *[A-H/][#b]?[^ \n]*     is chord starting with upper case letter or jus bass chord like Am/G    /F
+    #  *\(.*\)[^ \n]          is comment in ()
+    regex = r"^([A-Z].*:)? *( *[A-H/][#b]?[^ \n]*| *\(.*\)[^ \n]*)+ *$"
     is_chord_line_re = re.compile(regex)
 
     chord_line_indexes = []
@@ -112,7 +118,12 @@ def get_chord_line_indexes(lines):
             not_chord_line_indexes.append(i)
     return chord_line_indexes, not_chord_line_indexes
 
+
+"""
+Deprecated
+"""
 def chords_from_chord_line(chord_line):
+    # deprecated
 
     regex_one = "[A-H][#b]?[^ ]*"
     fiter = re.finditer(regex_one, chord_line)
@@ -124,6 +135,7 @@ def chords_from_chord_line(chord_line):
         sp.append(m.end(0))
         chords_from_line.append(m.group(0))
     return chords_from_line, st, sp
+
 
 def fill_line_to_length(line, max_length):
     """
